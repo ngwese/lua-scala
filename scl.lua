@@ -1,5 +1,9 @@
 local io = require('io')
 
+---
+--- Pitch
+---
+
 local Pitch = {}
 Pitch.__index = Pitch
 
@@ -10,6 +14,10 @@ end
 
 function Pitch:__tostring()
   return tostring(self[1]) .. '/' .. tostring(self[2])
+end
+
+function Pitch:__call()
+  return self[1] / self[2]
 end
 
 function Pitch.parse(str)
@@ -28,7 +36,7 @@ function Pitch.parse(str)
 end
 
 --
---
+-- Scale
 --
 
 local Scale = {}
