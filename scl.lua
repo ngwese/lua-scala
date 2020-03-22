@@ -30,23 +30,24 @@ function Pitch:__mul(n)
 end
 
 function Pitch.parse(str)
-  -- scala pitch line syntax
-  local p = string.match(str, "([%d-./]+)")
-  if p == nil then
-    return nil
-  end
-  -- lame double match to detect ratio syntax
-  local n, d = string.match(p, "([%d.-]+)/([%d.-]+)")
+  -- try full ratio syntax
+  local n, d = string.match(str, "([%d.-]+)%s*/%s*([%d.-]+)")
   if n ~= nil then
     return Pitch.new(tonumber(n), tonumber(d))
   end
-  -- singular value, determine if in cents or ratio
-  if string.find(p, "[.]") ~= nil then
-    -- cents
-    return Pitch.new(tonumber(p), 1200)
+
+  -- try individual number
+  local p = string.match(str, "([%d-.]+)")
+  if p ~= nil then
+    -- determine if in cents or ratio
+    if string.find(p, "[.]") ~= nil then
+      return Pitch.new(tonumber(p), 1200) -- cents
+    end
+    return Pitch.new(tonumber(p), 1)
   end
 
-  return Pitch.new(tonumber(p), 1)
+  -- not recognized
+  return nil
 end
 
 --
