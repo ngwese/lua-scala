@@ -52,7 +52,10 @@ Scale.__index = Scale
 
 function Scale.new(pitches, description)
   local o = setmetatable({}, Scale)
+  o.degrees = #pitches
   o.pitches = pitches
+  o.pitches[0] = Pitch.new(1, 1) -- unison
+  o.octave_interval = pitches[o.degrees]()
   o.description = description or ""
   return o
 end
@@ -88,28 +91,25 @@ function Scale.load(path)
   return Scale.new(pitches, description)
 end
 
-function Scale:multiplier(degree)
-  -- this seems dumb, should be simplier?
-  if degree == 0 then
-    return 0
+function Scale.equal_temperment(degrees)
+  local pitches = {}
+  local interval = 1 / degrees
+  for d = 1, degrees do
+    pitches[d] = Pitch.new((d * interval) + 1)
   end
-  local s = #self.pitches
-  local octave_r = self.pitches[s]()
-  local n = math.floor(degree / s)
-  local d = 0
-  local r = nil
-  if degree < 0 then
-    d = math.abs(degree) % s
-    r = -self.pitches[d]
-  else
-    d = degree % s
-    r = self.pitches[d]
-  end
-  if r then r = r() else r = 0 end
-  return (octave_r * n) + r
+  local description = tostring(degrees) .. "-TET"
+  return Scale.new(pitches, description)
 end
 
+function Scale:pitch_class(degree)
+  return self.pitches[degree % self.degrees]
+end
 
+function Scale:ratio(degree)
+  local octave = math.floor(degree / self.degrees)
+  local r = self:pitch_class(degree)()
+  return (self.octave_interval ^ octave) * r
+end
 
 --
 -- Mapping
