@@ -1,3 +1,5 @@
+scl/
+
 # Compiled Lua sources
 luac.out
 
