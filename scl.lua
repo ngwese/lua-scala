@@ -9,6 +9,8 @@ local Pitch = {}
 Pitch.__index = Pitch
 
 function Pitch.new(n, d)
+  if n < 0 then error("Negative pitch numerator: " .. tostring(n)) end
+  if d < 0 then error("Negative pitch denominator: " .. tostring(d)) end
   local o = { n, d or 1 }
   return setmetatable(o, Pitch)
 end
@@ -36,11 +38,15 @@ function Pitch.parse(str)
   -- lame double match to detect ratio syntax
   local n, d = string.match(p, "([%d.-]+)/([%d.-]+)")
   if n ~= nil then
-    -- FIXME: should error on negative ratios
     return Pitch.new(tonumber(n), tonumber(d))
   end
+  -- singular value, determine if in cents or ratio
+  if string.find(p, "[.]") ~= nil then
+    -- cents
+    return Pitch.new(tonumber(p), 1200)
+  end
 
-  return Pitch.new(tonumber(p), 1200)
+  return Pitch.new(tonumber(p), 1)
 end
 
 --
