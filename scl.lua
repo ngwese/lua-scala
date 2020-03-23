@@ -90,7 +90,7 @@ function Scale.new(pitches, description)
   return o
 end
 
---- Create a Scale object from a given set of decimal ratios
+--- Create a Scale object from a given set of decimal ratios.
 -- @tparam {number|{number,number}} Ratio as decimal or interger pair
 -- @treturn Scale
 function Scale.of(ratios)
@@ -179,6 +179,16 @@ function Scale:ratio(degree)
   local octave = math.floor(degree / self.degrees)
   local r = self:pitch_class(degree)()
   return (self.octave_interval ^ octave) * r
+end
+
+--- Return a table of the pitch classes in decimal ratio form.
+-- @treturn {number}
+function Scale:as_decimals()
+  local rs = {}
+  for _, r in ipairs(self.pitches) do
+    table.insert(rs, r())
+  end
+  return rs
 end
 
 --
