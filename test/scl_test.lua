@@ -120,4 +120,28 @@ function test_scale_tet()
   T.assertAlmostEquals(p3() - p1(), (p4() - p3()) * 2, 0.000001)
 end
 
+function test_scale_pitch_class()
+  local degrees = 12
+  local s = scl.Scale.equal_temperment(degrees)
+  T.assertEquals(s:pitch_class(0), s.pitches[0])
+   -- positive wrap around
+  T.assertEquals(s:pitch_class(degrees), s.pitches[0])
+  T.assertEquals(s:pitch_class(degrees + 2), s.pitches[2])
+  -- negative wrap around
+  T.assertEquals(s:pitch_class(-degrees), s.pitches[0])
+  T.assertEquals(s:pitch_class(-1), s.pitches[degrees - 1])
+end
+
+function test_scale_ratio()
+  local degrees = 6
+  local s = scl.Scale.equal_temperment(degrees)
+  T.assertEquals(s:ratio(0), 1.0)
+  T.assertEquals(s:ratio(3), 1.5)
+  T.assertEquals(s:ratio(degrees), 2.0)
+  T.assertEquals(s:ratio(degrees * 2), 4.0)
+  T.assertEquals(s:ratio(-3), 0.75)
+  T.assertEquals(s:ratio(-degrees), 0.5)
+  T.assertEquals(s:ratio(-degrees * 2), 0.25)
+end
+
 os.exit(T.LuaUnit.run())
