@@ -1,3 +1,11 @@
+--- Scala tuning file module
+--
+-- References:
+--   http://www.huygens-fokker.org/scala/scl_format.html
+--
+-- @module scl
+--
+
 local io = require('io')
 local math = require('math')
 
@@ -8,6 +16,15 @@ local math = require('math')
 local Pitch = {}
 Pitch.__index = Pitch
 
+--- Create a Pitch ratio object.
+--
+-- Represents a pitch a ratio relative to a reference frequency. Passing
+-- negative values will result in an error.
+--
+-- @tparam number n Numerator, required.
+-- @tparam number d Denominator, defaults to 1.
+--
+-- @treturn Pitch instance.
 function Pitch.new(n, d)
   d = d or 1
   if n < 0 then error("Negative pitch numerator: " .. tostring(n)) end
@@ -16,20 +33,9 @@ function Pitch.new(n, d)
   return setmetatable(o, Pitch)
 end
 
-function Pitch:__tostring()
-  return tostring(self[1]) .. '/' .. tostring(self[2])
-end
-
-function Pitch:__call()
-  return self[1] / self[2]
-end
-
-function Pitch:__mul(n)
-  local d = self[2]
-  local m = (n * d) / d
-  return Pitch.new(self[1] * m, d)
-end
-
+--- Create a Pitch by parsing scala format pitch notation.
+-- @tparam string str Textural pitch notation.
+-- @treturn Pitch|nil if unable to parse
 function Pitch.parse(str)
   -- try full ratio syntax
   local n, d = string.match(str, "([%d.-]+)%s*/%s*([%d.-]+)")
@@ -51,6 +57,18 @@ function Pitch.parse(str)
   return nil
 end
 
+--- Return a string representation of the ratio.
+-- @treturn string
+function Pitch:__tostring()
+  return tostring(self[1]) .. '/' .. tostring(self[2])
+end
+
+--- Return the ratio as a decimal number
+-- @treturn number
+function Pitch:__call()
+  return self[1] / self[2]
+end
+
 --
 -- Scale
 --
@@ -58,6 +76,10 @@ end
 local Scale = {}
 Scale.__index = Scale
 
+--- Create a Scale object given a list of pitches.
+-- @tparam {Pitch} pitches List of pitches for each degree in the scale.
+-- @tparam string description Description of the scale, defaults to "".
+-- @treturn Scale
 function Scale.new(pitches, description)
   local o = setmetatable({}, Scale)
   o.degrees = #pitches
@@ -72,6 +94,12 @@ local function is_comment(line)
   return string.find(line, "^!")
 end
 
+--- Create a Scale by loading a Scala .scl file.
+--
+-- Invalid scl files will generally result in an error.
+--
+-- @tparam string path Path to .scl file
+-- @treturn Scale
 function Scale.load(path)
   local pitches = {}
   local lines = io.lines(path)
@@ -99,6 +127,9 @@ function Scale.load(path)
   return Scale.new(pitches, description)
 end
 
+--- Create an equal temperment scale with the given number of degrees.
+-- @tparam number degrees Number of degrees/steps in the scale
+-- @treturn Scale
 function Scale.equal_temperment(degrees)
   local pitches = {}
   local interval = 1 / degrees
@@ -109,10 +140,26 @@ function Scale.equal_temperment(degrees)
   return Scale.new(pitches, description)
 end
 
+--- Return the Pitch for the given scale degree.
+--
+-- Negative or positive degree values >= the number of degrees in the scale are
+-- wrapped to the pitch within the scale (octave is discarded). For direct
+-- access to the pitches themselves index into the pitches property on the
+-- instance.
+--
+-- @tparam number degree
+-- @treturn Pitch
 function Scale:pitch_class(degree)
   return self.pitches[degree % self.degrees]
 end
 
+--- Return the ratio relative to reference frequency for the given degree.
+--
+-- The ratio will reflect the appropriate octave when given negative or positive
+-- degree values greater than the number of degrees in the scale.
+--
+-- @tparam number degree
+-- @treturn number
 function Scale:ratio(degree)
   local octave = math.floor(degree / self.degrees)
   local r = self:pitch_class(degree)()
