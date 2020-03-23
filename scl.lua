@@ -9,9 +9,10 @@ local Pitch = {}
 Pitch.__index = Pitch
 
 function Pitch.new(n, d)
+  d = d or 1
   if n < 0 then error("Negative pitch numerator: " .. tostring(n)) end
   if d < 0 then error("Negative pitch denominator: " .. tostring(d)) end
-  local o = { n, d or 1 }
+  local o = { n, d }
   return setmetatable(o, Pitch)
 end
 
@@ -102,7 +103,7 @@ function Scale.equal_temperment(degrees)
   local pitches = {}
   local interval = 1 / degrees
   for d = 1, degrees do
-    pitches[d] = Pitch.new((d * interval) + 1)
+    pitches[d] = Pitch.new(1 + (d * interval))
   end
   local description = tostring(degrees) .. "-TET"
   return Scale.new(pitches, description)
