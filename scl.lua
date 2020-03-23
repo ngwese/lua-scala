@@ -90,6 +90,21 @@ function Scale.new(pitches, description)
   return o
 end
 
+--- Create a Scale object from a given set of decimal ratios
+-- @tparam {number|{number,number}} Ratio as decimal or interger pair
+-- @treturn Scale
+function Scale.of(ratios)
+  local pitches = {}
+  for _, r in ipairs(ratios) do
+    if type(r) == 'table' then
+      table.insert(pitches, Pitch.new(r[1], r[2]))
+    else
+      table.insert(pitches, Pitch.new(r))
+    end
+  end
+  return Scale.new(pitches, ratios.description)
+end
+
 local function is_comment(line)
   return string.find(line, "^!")
 end

@@ -107,6 +107,19 @@ function test_scale_load()
   T.assertEquals(p6[2], 1200)
 end
 
+function test_scale_of()
+  local s = scl.Scale.of{
+    description = "test", -- optional
+    25/24, 1.06, {14, 9}, 2
+  }
+  T.assertEquals(s.degrees, 4)
+  T.assertEquals(s:pitch_class(1)(), 25/24)
+  T.assertEquals(s:pitch_class(2)(), 1.06)
+  T.assertEquals(s:pitch_class(3)(), 14/9)
+
+  T.assertEquals(s.description, "test")
+end
+
 function test_scale_tet()
   local s = scl.Scale.equal_temperment(5)
   T.assertEquals(s.degrees, 5)
